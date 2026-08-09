@@ -4,7 +4,10 @@ from bot import run_discord_bot
 
 app = Flask(__name__)
 
-# This is what visitors see when they visit your website URL
+# We moved this up here so Render actually runs it!
+bot_thread = threading.Thread(target=run_discord_bot)
+bot_thread.start()
+
 @app.route('/')
 def home():
     return """
@@ -13,9 +16,4 @@ def home():
     """
 
 if __name__ == '__main__':
-    # Start the Discord bot in a background thread
-    bot_thread = threading.Thread(target=run_discord_bot)
-    bot_thread.start()
-    
-    # Start the web server
     app.run(host='0.0.0.0', port=5000)
