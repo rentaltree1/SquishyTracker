@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squishy Tracker</title>
+    <style>
+        /* Base Styling & Colors */
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e9ecef; overflow-x: hidden; }
+        
+        /* Floating Background Images */
+        .bg-img { position: absolute; opacity: 0.15; width: 200px; animation: float 6s ease-in-out infinite; z-index: -1; }
+        .bg-1 { top: 10%; left: 10%; transform: rotate(-15deg); }
+        .bg-2 { bottom: 20%; left: 40%; transform: rotate(20deg); animation-delay: 2s; }
+        .bg-3 { top: 30%; right: 5%; transform: rotate(-10deg); animation-delay: 1s; }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        /* Home Screen */
+        .home-container { display: flex; flex-direction: column; align-items: center; padding-top: 15vh; }
+        .search-bar { width: 50%; padding: 15px 25px; border-radius: 50px; border: none; background: #8e8e8e; color: white; font-size: 1.2rem; outline: none; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .search-bar::placeholder { color: #d1d1d1; }
+        
+        .section-title { margin-top: 100px; font-size: 2.5rem; color: #333; }
+
+        /* Top Right Menu Button */
+        .menu-btn { position: fixed; top: 20px; right: 20px; background: #333; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; z-index: 100; font-weight: bold; }
+
+        /* Sidebar (Right) */
+        .sidebar { position: fixed; top: 0; right: -350px; width: 300px; height: 100vh; background: #d3d3d3; transition: 0.3s; z-index: 101; padding: 20px; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
+        .sidebar.open { right: 0; }
+        .close-btn { font-size: 1.5rem; cursor: pointer; float: right; font-weight: bold; }
+        .store-item { display: flex; flex-direction: column; align-items: center; margin-top: 30px; }
+        .store-btn { background: #b0b0b0; border: none; padding: 8px 20px; border-radius: 15px; margin-top: 5px; cursor: pointer; }
+        .store-btn.active { background: #4CAF50; color: white; }
+
+        /* Search Results Modal / Overlay */
+        .results-modal { position: fixed; bottom: -100%; left: 0; width: 100%; height: 90vh; background: #d3d3d3; border-radius: 30px 30px 0 0; transition: 0.5s cubic-bezier(0.1, 0.9, 0.2, 1); z-index: 99; box-shadow: 0 -10px 25px rgba(0,0,0,0.2); overflow-y: auto; padding-bottom: 50px; }
+        .results-modal.open { bottom: 0; }
+        .drag-bar { width: 100%; height: 40px; display: flex; justify-content: center; align-items: center; cursor: grab; background: white; border-radius: 30px 30px 0 0; position: sticky; top: 0; z-index: 10; }
+        .drag-handle { width: 60px; height: 6px; background: #ccc; border-radius: 10px; }
+
+        /* Grid & Cards (Used for both Results and Notifications) */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 30px; max-width: 1200px; margin: 0 auto; }
+        .item-card { background: #b0b0b0; border-radius: 20px; padding: 15px; display: flex; flex-direction: column; align-items: center; position: relative; border: 3px solid #e9ecef; }
+        .item-img-container { width: 100%; height: 200px; background: #9e9e9e; border-radius: 15px; display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: pointer; }
+        .item-img-container img { max-width: 90%; max-height: 90%; object-fit: contain; }
+        .store-logo { position: absolute; top: 20px; right: 20px; width: 30px; height: 30px; border-radius: 50%; background: white; padding: 2px; }
+        
+        .card-btn { width: 100%; background: #8e8e8e; color: white; border: none; padding: 10px; border-radius: 10px; margin-top: 10px; font-weight: bold; cursor: pointer; }
+        .btn-notify.active { background: #4CAF50; }
+    </style>
+</head>
+<body>
+
+    <img src="/static/images/fuzzball.png" class="bg-img bg-1">
+    <img src="/static/images/gobs.png" class="bg-img bg-2">
+    <img src="/static/images/dreamdrop.png" class="bg-img bg-3">
+
+    <button class="menu-btn" onclick="toggleSidebar()">MENU</button>
+
+    <div class="sidebar" id="sidebar">
+        <span class="close-btn" onclick="toggleSidebar()">X</span>
+        <div class="store-item">
+            <span>Target</span>
+            <button class="store-btn active" id="target-toggle" onclick="toggleStore()">Selected</button>
+        </div>
+    </div>
+
+    <div class="home-container">
+        <input type="text" class="search-bar" id="search-input" placeholder="Search for Fuzzball, Nice Cube..." onkeypress="checkEnter(event)">
+        
+        <h1 class="section-title">Current Notifications</h1>
+        <div class="card-grid">
+            <div class="item-card">
+                <div class="store-logo"><img src="/static/images/target.png" width="100%"></div>
+                <div class="item-img-container" onclick="window.open('https://www.target.com', '_blank')">
+                    <img src="/static/images/fuzzball.png">
+                </div>
+                <button class="card-btn">Last seen: Never</button>
+                <button class="card-btn">Status: Out of Stock</button>
+                <button class="card-btn btn-notify active">Unnotify</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-modal" id="results-modal">
+        <div class="drag-bar" id="drag-bar" onclick="closeModal()">
+            <div class="drag-handle"></div>
+        </div>
+        <div class="card-grid" id="search-results-grid">
+            <div class="item-card">
+                <div class="store-logo"><img src="/static/images/target.png" width="100%"></div>
+                <div class="item-img-container" onclick="window.open('https://www.target.com', '_blank')">
+                    <img src="/static/images/nicecube.png">
+                </div>
+                <button class="card-btn">Last seen: Never</button>
+                <button class="card-btn">Status: Checking...</button>
+                <button class="card-btn btn-notify">Notify</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Location Prompt on load
+        window.onload = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => console.log("Location grabbed: ", position),
+                    (error) => console.log("Location denied.")
+                );
+            }
+        };
+
+        // Sidebar logic
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+        function toggleStore() {
+            let btn = document.getElementById('target-toggle');
+            if(btn.classList.contains('active')){
+                btn.classList.remove('active');
+                btn.innerText = "Unselected";
+            } else {
+                btn.classList.add('active');
+                btn.innerText = "Selected";
+            }
+        }
+
+        // Search logic
+        function checkEnter(event) {
+            if (event.key === "Enter") {
+                document.getElementById('results-modal').classList.add('open');
+                // We will add the actual python search link in Phase 2
+            }
+        }
+
+        // Swipe down to close logic (Simplified with click for desktop)
+        function closeModal() {
+            document.getElementById('results-modal').classList.remove('open');
+            document.getElementById('search-input').value = "";
+        }
+    </script>
+</body>
+</html>
