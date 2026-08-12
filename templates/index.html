@@ -83,7 +83,8 @@
                 </div>
                 <button class="card-btn">Last seen: Never</button>
                 <button class="card-btn">Status: Out of Stock</button>
-                <button class="card-btn btn-notify active">Unnotify</button>
+                
+                <button class="card-btn btn-notify active" onclick="toggleNotify('Fuzzball', this)">Unnotify</button>
             </div>
         </div>
     </div>
@@ -100,7 +101,8 @@
                 </div>
                 <button class="card-btn">Last seen: Never</button>
                 <button class="card-btn">Status: Checking...</button>
-                <button class="card-btn btn-notify">Notify</button>
+
+                <button class="card-btn btn-notify" onclick="toggleNotify('Nice Cube', this)">Notify</button>
             </div>
         </div>
     </div>
@@ -135,14 +137,39 @@
         function checkEnter(event) {
             if (event.key === "Enter") {
                 document.getElementById('results-modal').classList.add('open');
-                // We will add the actual python search link in Phase 2
             }
         }
 
-        // Swipe down to close logic (Simplified with click for desktop)
+        // Swipe down to close logic
         function closeModal() {
             document.getElementById('results-modal').classList.remove('open');
             document.getElementById('search-input').value = "";
+        }
+
+        // --- FIREBASE NOTIFICATION TOGGLE (ADDED IN STEP 4) ---
+        function toggleNotify(itemName, btnElement) {
+            let isTracking = false;
+            
+            // Change the button color visually
+            if (btnElement.classList.contains('active')) {
+                btnElement.classList.remove('active');
+                btnElement.innerText = "Notify";
+                isTracking = false;
+            } else {
+                btnElement.classList.add('active');
+                btnElement.innerText = "Unnotify";
+                isTracking = true;
+            }
+
+            // Send the data silently in the background to Python
+            fetch('/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item: itemName, tracking: isTracking })
+            })
+            .then(response => response.json())
+            .then(data => console.log(data.message))
+            .catch(error => console.error("Error:", error));
         }
     </script>
 </body>
