@@ -57,9 +57,9 @@
 </head>
 <body>
 
-    <img src="/static/images/fuzzball.png" class="bg-img bg-1">
-    <img src="/static/images/gobs.png" class="bg-img bg-2">
-    <img src="/static/images/dreamdrop.png" class="bg-img bg-3">
+    <img src="{{ url_for('static', filename='images/fuzzball.jpg') }}" class="bg-img bg-1">
+    <img src="{{ url_for('static', filename='images/gobs.png') }}" class="bg-img bg-2">
+    <img src="{{ url_for('static', filename='images/dreamdrop.png') }}" class="bg-img bg-3">
 
     <button class="menu-btn" onclick="toggleSidebar()">MENU</button>
 
@@ -77,13 +77,12 @@
         <h1 class="section-title">Current Notifications</h1>
         <div class="card-grid">
             <div class="item-card">
-                <div class="store-logo"><img src="/static/images/target.png" width="100%"></div>
+                <div class="store-logo"><img src="{{ url_for('static', filename='images/target.png') }}" width="100%"></div>
                 <div class="item-img-container" onclick="window.open('https://www.target.com', '_blank')">
-                    <img src="/static/images/fuzzball.png">
+                    <img src="{{ url_for('static', filename='images/fuzzball.jpg') }}">
                 </div>
                 <button class="card-btn">Last seen: Never</button>
                 <button class="card-btn">Status: Out of Stock</button>
-                
                 <button class="card-btn btn-notify active" onclick="toggleNotify('Fuzzball', this)">Unnotify</button>
             </div>
         </div>
@@ -95,13 +94,12 @@
         </div>
         <div class="card-grid" id="search-results-grid">
             <div class="item-card">
-                <div class="store-logo"><img src="/static/images/target.png" width="100%"></div>
+                <div class="store-logo"><img src="{{ url_for('static', filename='images/target.png') }}" width="100%"></div>
                 <div class="item-img-container" onclick="window.open('https://www.target.com', '_blank')">
-                    <img src="/static/images/nicecube.png">
+                    <img src="{{ url_for('static', filename='images/nicecube.png') }}">
                 </div>
                 <button class="card-btn">Last seen: Never</button>
                 <button class="card-btn">Status: Checking...</button>
-
                 <button class="card-btn btn-notify" onclick="toggleNotify('Nice Cube', this)">Notify</button>
             </div>
         </div>
@@ -146,11 +144,10 @@
             document.getElementById('search-input').value = "";
         }
 
-        // --- FIREBASE NOTIFICATION TOGGLE (ADDED IN STEP 4) ---
+        // Firebase Notification Toggle
         function toggleNotify(itemName, btnElement) {
             let isTracking = false;
             
-            // Change the button color visually
             if (btnElement.classList.contains('active')) {
                 btnElement.classList.remove('active');
                 btnElement.innerText = "Notify";
@@ -161,7 +158,6 @@
                 isTracking = true;
             }
 
-            // Send the data silently in the background to Python
             fetch('/notify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
